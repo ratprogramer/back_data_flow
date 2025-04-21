@@ -1,0 +1,113 @@
+CREATE DATABASE l1m5;
+USE l1m5;
+
+CREATE TABLE usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    dni INT NOT NULL UNIQUE,
+    nombre VARCHAR(50) NOT NULL,
+    contraseña varchar(100) NOT NULL,
+    email VARCHAR(30) NOT NULL UNIQUE,
+    rol ENUM('Analista', 'Administrador') NOT NULL
+);
+
+CREATE TABLE producto_proceso (
+	id_pp INT PRIMARY KEY AUTO_INCREMENT,
+    nombre_pp ENUM('Bebida semi elaborada','Bebida pasteurizada', 'Corte de bebida lactea'),
+    fecha_analisis DATE DEFAULT (CURRENT_DATE),
+    fecha_toma_muestra DATE,
+    hora_toma_muestra TIME,
+    lote VARCHAR(10),
+    punto_muestra ENUM('Tanque 7','Tanque 9','Tanque 10','Tanque 12','Alternativo', 'Fabricación', 'Pasteurizador'),
+    punto_alterno VARCHAR(20) NULL,
+	observaciones VARCHAR(100) NULL,
+    responsable_analisis INT,
+    FOREIGN KEY (responsable_analisis) REFERENCES usuarios(id)
+);
+
+
+CREATE TABLE producto_terminado (
+	id_pt VARCHAR(20) PRIMARY KEY,
+    fecha_analisis DATE DEFAULT (CURRENT_DATE),
+    fecha_env DATE DEFAULT (CURRENT_DATE),
+    fecha_vencimiento DATE,
+    ref ENUM('Mora','Melocoton', 'Fresa', 'Kumis'),
+    presentacion ENUM('1000 ml', '200 ml'),
+    lote VARCHAR(6),
+    hora_empaque TIME,
+    maquina_envasadora ENUM('M1', 'M2', 'M3', 'M4'),
+    observaciones VARCHAR(100) NULL,
+    responsable_analisis INT,
+    id_pp INT,
+    FOREIGN KEY (responsable_analisis) REFERENCES usuarios(id),
+    FOREIGN KEY (id_pp) REFERENCES producto_proceso(id_pp)
+);
+
+
+CREATE TABLE saborizacion(
+	id_sb INT PRIMARY KEY AUTO_INCREMENT,
+    sabor ENUM('Mora','Melocoton', 'Fresa', 'Kumis'),
+    fecha_analisis DATE,
+    fecha_toma_muestra DATE,
+    hora_toma_muestra TIME,
+    tanque ENUM('Tanque 7','Tanque 9','Tanque 10','Tanque 12'),
+    lote VARCHAR(10),
+	observaciones VARCHAR(100) NULL,
+    responsable_analisis INT,
+    FOREIGN KEY (responsable_analisis) REFERENCES usuarios(id)
+);
+
+CREATE TABLE resultados(
+	id INT PRIMARY KEY AUTO_INCREMENT,
+    fecha_24h DATE NULL,
+    fecha_5d DATE NULL,
+    e_coli VARCHAR(5),
+    coliformes VARCHAR(5),
+    mohos_ley VARCHAR(5),
+    cabina ENUM('C','NC') NULL,
+    medio_cultivo ENUM('C','NC') NULL,
+    observaciones VARCHAR(255) NULL,
+    id_pp INT NULL,
+    id_pt VARCHAR(255) NULL,
+    id_sb INT NULL,
+    responsable_analisis_24 INT NULL,
+    responsable_analisis_5 INT NULL,
+    FOREIGN KEY (responsable_analisis_24) REFERENCES usuarios(id),
+    FOREIGN KEY (responsable_analisis_5) REFERENCES usuarios(id),
+    FOREIGN KEY (id_pp) REFERENCES producto_proceso(id_pp),
+    FOREIGN KEY (id_pt) REFERENCES producto_terminado(id_pt),
+    FOREIGN KEY (id_sb) REFERENCES saborizacion(id_sb)	
+);
+
+INSERT INTO saborizacion (sabor, fecha_analisis, fecha_toma_muestra, hora_toma_muestra, tanque, lote, observaciones, responsable_analisis)
+
+VALUES ('Mora', '2025-03-05', '2025-03-03', '19:30:00', 'Tanque 9', 'MoT911111', NULL, 1),
+
+('Mora', '2025-03-05', '2025-03-03', '19:30:00', 'Tanque 9', 'MoT922222', NULL, 1),
+
+('Mora', '2025-03-05', '2025-03-03', '19:30:00', 'Tanque 9', 'MoT933333', NULL, 1),
+
+('Mora', '2025-03-05', '2025-03-03', '19:30:00', 'Tanque 9', 'MoT944444', NULL, 1),
+
+('Mora', '2025-03-05', '2025-03-03', '19:30:00', 'Tanque 9', 'MoT955555', NULL, 1);
+
+
+
+INSERT INTO resultados (fecha_24h, e_coli, coliformes, cabina, medio_cultivo, observaciones, id_sb, responsable_analisis_24)
+
+VALUES ('2025-03-05', '>1', '<1', 'C', 'NC', NULL, 1, 1), 
+
+('2025-03-05', '>1', '<1', 'C', 'NC', NULL, 2, 1),
+
+('2025-03-05', '>1', '<1', 'C', 'NC', NULL, 3, 1),
+
+('2025-03-05', '>1', '<1', 'C', 'NC', NULL, 4, 1),
+
+('2025-03-05', '>1', '<1', 'C', 'NC', NULL, 5, 1);
+
+
+
+UPDATE resultados SET fecha_5d = '2025-03-05', mohos_ley = '122', observaciones = NULL, responsable_analisis_5 = 1 WHERE id_sb = 1;
+
+UPDATE resultados SET fecha_5d = '2025-03-05', mohos_ley = '122', observaciones = NULL, responsable_analisis_5 = 1 WHERE id_sb = 3;
+
+UPDATE resultados SET fecha_5d = '2025-03-05', mohos_ley = '122', observaciones = NULL, responsable_analisis_5 = 1 WHERE id_sb = 4;
